@@ -25,9 +25,7 @@ Windows için modern, minimalist bir masaüstü not uygulaması. Glassmorphism t
 
 ### Hazır EXE (Önerilen)
 
-1. Repoyu klonla veya ZIP olarak indir
-2. `dist/win-unpacked/` klasörüne git
-3. `FaegAz Notes.exe` dosyasını çalıştır
+ `FaegAz Notes.exe` dosyasını çalıştır
 
 > ⚠️ Windows "Bilinmeyen Yayıncı" uyarısı verirse **"Yine de çalıştır"** seçeneğini seç.
 
