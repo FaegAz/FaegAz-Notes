@@ -1,13 +1,69 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, screen } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, screen, Notification } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const storage = require('../modules/storage');
 const ocr = require('../modules/ocr');
-const translator = require('../modules/translator');
+
+// ── OCR Dil Listesi ──
+const LANG_LIST = [
+  { code: 'en',     name: 'İngilizce',           native: 'English',    flag: '🇬🇧', latin: true,  default: true },
+  { code: 'fr',     name: 'Fransızca',            native: 'Français',   flag: '🇫🇷', latin: true  },
+  { code: 'de',     name: 'Almanca',              native: 'Deutsch',    flag: '🇩🇪', latin: true  },
+  { code: 'es',     name: 'İspanyolca',           native: 'Español',    flag: '🇪🇸', latin: true  },
+  { code: 'it',     name: 'İtalyanca',            native: 'Italiano',   flag: '🇮🇹', latin: true  },
+  { code: 'pt',     name: 'Portekizce',           native: 'Português',  flag: '🇵🇹', latin: true  },
+  { code: 'nl',     name: 'Hollandaca',           native: 'Nederlands', flag: '🇳🇱', latin: true  },
+  { code: 'pl',     name: 'Lehçe',                native: 'Polski',     flag: '🇵🇱', latin: true  },
+  { code: 'tr',     name: 'Türkçe',               native: 'Türkçe',     flag: '🇹🇷', latin: true  },
+  { code: 'ru',     name: 'Rusça',                native: 'Русский',    flag: '🇷🇺', sizeMB: 40   },
+  { code: 'uk',     name: 'Ukraynaca',            native: 'Українська', flag: '🇺🇦', sizeMB: 40   },
+  { code: 'ja',     name: 'Japonca',              native: '日本語',       flag: '🇯🇵', sizeMB: 50   },
+  { code: 'ko',     name: 'Korece',               native: '한국어',       flag: '🇰🇷', sizeMB: 50   },
+  { code: 'ch_sim', name: 'Çince (Basit)',         native: '中文简体',     flag: '🇨🇳', sizeMB: 50   },
+  { code: 'ch_tra', name: 'Çince (Geleneksel)',    native: '中文繁體',     flag: '🇹🇼', sizeMB: 50   },
+  { code: 'ar',     name: 'Arapça',               native: 'العربية',    flag: '🇸🇦', sizeMB: 40   },
+  { code: 'hi',     name: 'Hintçe',               native: 'हिन्दी',       flag: '🇮🇳', sizeMB: 45   },
+  { code: 'th',     name: 'Tayca',                native: 'ภาษาไทย',    flag: '🇹🇭', sizeMB: 40   },
+];
+
+function getOcrConfigPath() {
+  return path.join(app.getPath('userData'), 'ocr-langs.json');
+}
+
+function loadOcrLangs() {
+  try {
+    const data = JSON.parse(fs.readFileSync(getOcrConfigPath(), 'utf8'));
+    if (Array.isArray(data) && data.length) return data;
+  } catch { /* yok */ }
+  return ['en'];
+}
+
+function saveOcrLangs(langs) {
+  fs.writeFileSync(getOcrConfigPath(), JSON.stringify(langs));
+}
 
 let mainWindow = null;
 let floatingPanel = null;
 let tray = null;
 let selectWinPreloaded = null;
+
+function fadePanel(win, from, to, duration = 180) {
+  return new Promise((resolve) => {
+    if (!win || win.isDestroyed()) { resolve(); return; }
+    const steps = 12;
+    const interval = duration / steps;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const opacity = from + (to - from) * (step / steps);
+      if (!win.isDestroyed()) win.setOpacity(opacity);
+      if (step >= steps) {
+        clearInterval(timer);
+        resolve();
+      }
+    }, interval);
+  });
+}
 
 function preloadSelectWin() {
   if (selectWinPreloaded && !selectWinPreloaded.isDestroyed()) return;
@@ -63,7 +119,12 @@ function createMainWindow() {
 // ── Floating Panel (272×480, always-on-top, transparent) ──
 function createFloatingPanel() {
   if (floatingPanel && !floatingPanel.isDestroyed()) {
-    floatingPanel.isVisible() ? floatingPanel.hide() : floatingPanel.show();
+    if (floatingPanel.isVisible()) {
+      floatingPanel.hide();
+    } else {
+      floatingPanel.setAlwaysOnTop(true, 'screen-saver');
+      floatingPanel.show();
+    }
     return;
   }
 
@@ -88,6 +149,9 @@ function createFloatingPanel() {
     },
   });
 
+  // screen-saver seviyesi fullscreen oyunların üstünde kalır (Windows HWND_TOPMOST yetmez)
+  floatingPanel.setAlwaysOnTop(true, 'screen-saver');
+
   floatingPanel.loadFile(path.join(__dirname, '../renderer/index.html'));
 
   floatingPanel.on('closed', () => {
@@ -100,18 +164,14 @@ function createFloatingPanel() {
 
 // ── Sistem Tepsisi (Tray) ──
 function createTray() {
-  // Tray ikonu — basit bir 16x16 veri URI kullanıyoruz
-  // Gerçek projede build/icon.ico kullanılır
   const iconPath = path.join(__dirname, '../../logo-square.png');
   const { nativeImage } = require('electron');
 
-  // Eğer ikon dosyası yoksa boş bir ikon oluştur
   let trayIcon;
   try {
     trayIcon = nativeImage.createFromPath(iconPath);
     if (trayIcon.isEmpty()) throw new Error('empty');
   } catch {
-    // 16x16 basit mor ikon
     trayIcon = nativeImage.createEmpty();
   }
 
@@ -176,6 +236,20 @@ function setupIPC() {
   ipcMain.handle('get-calendar-events', (_e, year, month) => storage.getCalendarEvents(year, month));
   ipcMain.handle('delete-calendar-event', (_e, id) => storage.deleteCalendarEvent(id));
 
+  // OCR Dil Ayarları
+  ipcMain.handle('get-ocr-langs', () => ({
+    available: LANG_LIST,
+    enabled: ocr.getLangs(),
+  }));
+
+  ipcMain.handle('set-ocr-langs', (_e, langs) => {
+    const valid = langs.filter(c => LANG_LIST.some(l => l.code === c));
+    const final = valid.includes('en') ? valid : ['en', ...valid];
+    saveOcrLangs(final);
+    ocr.setLangs(final);
+    return final;
+  });
+
   // OCR + Çeviri
   ipcMain.handle('capture-screen', async () => {
     const screenshot = require('screenshot-desktop');
@@ -193,11 +267,9 @@ function setupIPC() {
   ipcMain.handle('start-screen-capture', async (_e, mode = 'word') => {
     const screenshot = require('screenshot-desktop');
 
-    // 1. Floating panel'i gizle
-    if (floatingPanel && !floatingPanel.isDestroyed()) {
-      floatingPanel.hide();
-    }
-    await new Promise((r) => setTimeout(r, 150));
+    // 1. Floating panel'i fade-out ile gizle
+    await fadePanel(floatingPanel, 1, 0);
+    await new Promise((r) => setTimeout(r, 50));
 
     // 2. Ekran görüntüsü al
     let base64;
@@ -207,7 +279,7 @@ function setupIPC() {
       console.log('[OCR] Ekran yakalandı, boyut:', img.length, 'byte');
     } catch (err) {
       console.error('[OCR] Ekran yakalama hatası:', err);
-      if (floatingPanel && !floatingPanel.isDestroyed()) floatingPanel.show();
+      fadePanel(floatingPanel, 0, 1);
       return { error: 'Ekran yakalanamadı' };
     }
 
@@ -217,7 +289,7 @@ function setupIPC() {
       const done = (result) => {
         if (resolved) return;
         resolved = true;
-        if (floatingPanel && !floatingPanel.isDestroyed()) floatingPanel.show();
+        fadePanel(floatingPanel, 0, 1);
         // Bir sonraki scan için arka planda yeni pencere hazırla
         preloadSelectWin();
         resolve(result);
@@ -302,6 +374,29 @@ function setupIPC() {
   });
 }
 
+// ── Takvim Bildirimleri ──
+function checkCalendarNotifications() {
+  const today = new Date().toISOString().split('T')[0];
+  const events = storage.getCalendarEvents().filter(e => e.date === today);
+  events.forEach(e => {
+    new Notification({
+      title: 'FaegAz Notes — Bugün',
+      body: e.text,
+      icon: path.join(__dirname, '../../logo-square.png'),
+    }).show();
+  });
+}
+
+function scheduleMidnightCheck() {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5);
+  const delay = midnight - now;
+  setTimeout(() => {
+    checkCalendarNotifications();
+    scheduleMidnightCheck();
+  }, delay);
+}
+
 // ── Uygulama Başlatma ──
 app.whenReady().then(async () => {
   await storage.init();
@@ -311,6 +406,13 @@ app.whenReady().then(async () => {
 
   // Alt+Shift+1 → Floating Panel aç/kapat
   globalShortcut.register('Alt+Shift+1', () => createFloatingPanel());
+
+  // Kaydedilmiş OCR dil tercihlerini yükle
+  ocr.setLangs(loadOcrLangs());
+
+  // Açılışta ve her gece yarısı takvim bildirimi
+  checkCalendarNotifications();
+  scheduleMidnightCheck();
 });
 
 app.on('will-quit', () => {

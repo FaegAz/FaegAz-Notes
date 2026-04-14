@@ -53,18 +53,6 @@ tabs.forEach((tab) => {
   });
 });
 
-// ── Zaman Formatlama ──
-function timeAgo(dateStr) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now - date) / 1000);
-
-  if (diff < 60) return 'şimdi';
-  if (diff < 3600) return `${Math.floor(diff / 60)}dk önce`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}sa önce`;
-  if (diff < 172800) return 'dün';
-  return `${Math.floor(diff / 86400)} gün önce`;
-}
 
 // ── Notları Yükle & Render ──
 async function loadNotes() {
@@ -79,7 +67,6 @@ async function loadNotes() {
   notesList.innerHTML = notes.map((n) => `
     <div class="note" data-id="${n.id}">
       <div class="note-text">${escapeHtml(n.content)}</div>
-      <div class="note-meta">${timeAgo(n.created_at)}</div>
       <button class="todo-delete note-delete-btn" data-delete="${n.id}">✕</button>
     </div>`).join('');
 

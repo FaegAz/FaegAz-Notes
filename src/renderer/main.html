@@ -364,6 +364,51 @@
       gap: 8px;
     }
 
+    /* ── Ayarlar — Dil Kartları ── */
+    .lang-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lang-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+    }
+
+    .lang-toggle {
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(168,85,247,0.35);
+      background: rgba(168,85,247,0.1);
+      color: #c084fc;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .lang-toggle:hover {
+      background: rgba(168,85,247,0.2);
+    }
+
+    .lang-toggle.enabled {
+      border-color: rgba(239,68,68,0.35);
+      background: rgba(239,68,68,0.08);
+      color: #f87171;
+    }
+
+    .lang-toggle.enabled:hover {
+      background: rgba(239,68,68,0.18);
+    }
+
     .section-label {
       font-size: 10px;
       color: rgba(255, 255, 255, 0.2);
@@ -1119,6 +1164,10 @@
           <div class="nav-item" data-page="calendar">
             <div class="nav-icon blue">&#x25A6;</div>
             <span class="nav-label">Takvim</span>
+          </div>
+          <div class="nav-item" data-page="settings">
+            <div class="nav-icon" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);">⚙</div>
+            <span class="nav-label">Ayarlar</span>
           </div>
         </div>
 

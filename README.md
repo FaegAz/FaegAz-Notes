@@ -1,78 +1,149 @@
 # FaegAz Notes
 
-Windows için modern, minimalist bir masaüstü not uygulaması. Glassmorphism tasarım, floating panel ve OCR desteği ile gelir.
+<div align="center">
 
 ![Platform](https://img.shields.io/badge/platform-Windows-blue)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
----
+**[🇹🇷 Türkçe için aşağı kaydır](#türkçe)**
 
-## Özellikler
-
-- 📝 **Notlar** — Hızlı not alma, inline düzenleme
-- ✅ **Görevler** — Yapılacaklar listesi, tamamlama takibi
-- 🔤 **Kelimeler** — İngilizce → Türkçe kelime kartları, otomatik çeviri
-- 📅 **Takvim** — Aylık görünüm, gün bazında etkinlik ekleme
-- ☑ **Alışkanlık Takibi** — Günlük alışkanlık çizelgesi
-- 🔲 **Floating Panel** — `Alt+Shift+1` kısayoluyla her yerden erişilebilen şeffaf panel
-- 📷 **OCR** — Ekrandan kelime seç → otomatik tanı ve çeviri *(Python gerektirir)*
-- 🎨 **Glassmorphism UI** — Özel pencere kontrolleri, animasyonlu sidebar
+</div>
 
 ---
 
-## Kurulum ve Çalıştırma
+## English
 
-### Hazır EXE (Önerilen)
+A modern, minimalist Windows desktop app for notes, tasks, habits, vocabulary and OCR.
 
-1. Repoyu klonla veya ZIP olarak indir
-2. `dist/win-unpacked/` klasörüne git
-3. `FaegAz Notes.exe` dosyasını çalıştır
+### Screenshots
 
-> ⚠️ Windows "Bilinmeyen Yayıncı" uyarısı verirse **"Yine de çalıştır"** seçeneğini seç.
+<!-- Ana pencere -->
+![Main Window](assets/screenshots/main.png)
 
----
+<!-- Floating panel -->
+![Floating Panel](assets/screenshots/floating.png)
 
-### Kaynak koddan çalıştırma
+<!-- OCR seçimi -->
+![OCR](assets/screenshots/ocr.png)
+
+### Features
+
+- **Notes** — Quick note-taking with inline editing and auto-math (`3+5=` → `8`)
+- **Tasks** — To-do list with completion tracking
+- **Words** — Vocabulary cards with automatic translation
+- **Calendar** — Monthly view with day-based events and notifications
+- **Habit Tracker** — Daily habit grid
+- **Floating Panel** — Always-on-top panel accessible anywhere via `Alt+Shift+1`, stays on top of fullscreen games
+- **OCR** — Select text from screen → auto-recognize and translate *(Python required)*
+- **Settings** — Manage OCR languages, download additional language models
+
+### Installation
+
+#### Ready EXE (Recommended)
+
+1. Download the latest release
+2. Run `FaegAz Notes 1.0.0.exe`
+
+> If Windows shows an "Unknown Publisher" warning, click **Run anyway**.
+
+#### From Source
 
 ```bash
-# Bağımlılıkları yükle
 npm install
-
-# Uygulamayı başlat
-npm start
+npm start         # run in dev mode
+npm run build     # build EXE to dist/
 ```
 
-**Gereksinimler:** [Node.js 18+](https://nodejs.org)
+**Requirements:** Node.js 18+
 
----
-
-## OCR Özelliği (Opsiyonel)
-
-Ekrandan kelime seçme özelliği için Python ve gerekli paketlerin kurulu olması gerekir:
+#### OCR Feature (Optional)
 
 ```bash
 pip install easyocr pillow numpy
 ```
 
-Çeviri için Argos Translate (offline) veya internet bağlantısı (MyMemory API) kullanılır.
+Translation is handled by MyMemory API (internet required, auto language detection). Additional OCR language models can be downloaded from the Settings page inside the app.
 
-> OCR kullanmıyorsan bu adımı atlayabilirsin, diğer tüm özellikler tam çalışır.
+### Tech Stack
+
+| | |
+|---|---|
+| Framework | Electron 33 |
+| Database | SQLite (sql.js) |
+| OCR | EasyOCR (Python) |
+| Translation | MyMemory API |
+| UI | Vanilla HTML/CSS/JS |
+
+### License
+
+MIT — Türker Yağız Odabaş
 
 ---
 
-## Teknolojiler
+## Türkçe
+
+Windows için modern, minimalist bir masaüstü not uygulaması. Not alma, görev takibi, alışkanlıklar, kelime kartları ve OCR özellikleriyle gelir.
+
+### Ekran Görüntüleri
+
+<!-- Ana pencere -->
+![Ana Pencere](assets/screenshots/main.png)
+
+<!-- Floating panel -->
+![Floating Panel](assets/screenshots/floating.png)
+
+<!-- OCR seçimi -->
+![OCR](assets/screenshots/ocr.png)
+
+### Özellikler
+
+- **Notlar** — Hızlı not alma, inline düzenleme, otomatik matematik (`3+5=` → `8`)
+- **Görevler** — Yapılacaklar listesi, tamamlama takibi
+- **Kelimeler** — Otomatik çeviri ile kelime kartları
+- **Takvim** — Aylık görünüm, gün bazında etkinlik ve bildirim
+- **Alışkanlık Takibi** — Günlük alışkanlık çizelgesi
+- **Floating Panel** — `Alt+Shift+1` kısayoluyla her yerden erişilebilen şeffaf panel, tam ekran oyunların üstünde kalır
+- **OCR** — Ekrandan bölge seç → otomatik metin tanıma ve çeviri *(Python gerektirir)*
+- **Ayarlar** — OCR dil yönetimi, ek dil modeli indirme
+
+### Kurulum
+
+#### Hazır EXE (Önerilen)
+
+1. Son sürümü indir
+2. `FaegAz Notes 1.0.0.exe` dosyasını çalıştır
+
+> Windows "Bilinmeyen Yayıncı" uyarısı verirse **"Yine de çalıştır"** seçeneğini seç.
+
+#### Kaynak Koddan
+
+```bash
+npm install
+npm start         # geliştirme modunda çalıştır
+npm run build     # dist/ klasörüne EXE üret
+```
+
+**Gereksinim:** Node.js 18+
+
+#### OCR Özelliği (Opsiyonel)
+
+```bash
+pip install easyocr pillow numpy
+```
+
+Çeviri için MyMemory API kullanılır (internet gerekir, otomatik dil algılama). Ek OCR dil modelleri uygulama içindeki Ayarlar sayfasından indirilebilir.
+
+### Teknolojiler
 
 | | |
 |---|---|
 | Çerçeve | Electron 33 |
 | Veritabanı | SQLite (sql.js) |
 | OCR | EasyOCR (Python) |
-| Çeviri | MyMemory API / Argos Translate |
+| Çeviri | MyMemory API |
 | UI | Vanilla HTML/CSS/JS |
 
----
-
-## Lisans
+### Lisans
 
 MIT — Türker Yağız Odabaş

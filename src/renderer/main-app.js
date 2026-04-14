@@ -34,10 +34,8 @@ navItems.forEach((item) => {
 });
 
 function loadPage() {
-  const titles = { notes: 'Notlar', todos: 'Görevler', words: 'Kelimeler' };
-  if (pageTitle) pageTitle.textContent = titles[currentPage];
   btnAutoMath.style.display = currentPage === 'notes' ? '' : 'none';
-  if (pageTitle) pageTitle.textContent = { notes: 'Notlar', todos: 'Görevler', words: 'Kelimeler', habits: 'Alışkanlıklar' }[currentPage] || '';
+  if (pageTitle) pageTitle.textContent = { notes: 'Notlar', todos: 'Görevler', words: 'Kelimeler', habits: 'Alışkanlıklar', calendar: 'Takvim', settings: 'Ayarlar' }[currentPage] || '';
 
   switch (currentPage) {
     case 'notes': return renderNotes();
@@ -45,6 +43,7 @@ function loadPage() {
     case 'words': return renderWords();
     case 'habits': return renderHabits();
     case 'calendar': return renderCalendar();
+    case 'settings': return renderSettings();
   }
 }
 
@@ -677,6 +676,65 @@ window.api.onDataChanged(() => loadPage());
 document.getElementById('btn-min').addEventListener('click', () => window.api.minimizeWindow());
 document.getElementById('btn-max').addEventListener('click', () => window.api.maximizeWindow());
 document.getElementById('btn-close-win').addEventListener('click', () => window.api.hideWindow());
+
+// ── Ayarlar — OCR Dil Yönetimi ──
+async function renderSettings() {
+  const { available, enabled } = await window.api.getOcrLangs();
+  let current = [...enabled];
+
+  const latin = available.filter(l => l.latin);
+  const other = available.filter(l => !l.latin);
+
+  function langCard(l) {
+    const isEnabled = current.includes(l.code);
+    const isDefault = l.default;
+    const sizeNote = l.latin
+      ? '<span style="font-size:10px;color:rgba(20,184,166,0.8);">indirme gerekmez</span>'
+      : `<span style="font-size:10px;color:rgba(234,179,8,0.8);">~${l.sizeMB}MB indirilecek</span>`;
+    const toggle = isDefault
+      ? `<span style="font-size:10px;color:rgba(255,255,255,0.25);padding:4px 10px;">varsayılan</span>`
+      : `<button class="lang-toggle ${isEnabled ? 'enabled' : ''}" data-code="${l.code}">
+           ${isEnabled ? 'Devre Dışı Bırak' : 'Etkinleştir'}
+         </button>`;
+    return `
+      <div class="lang-card">
+        <span style="font-size:18px;">${l.flag}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);">${l.name}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);">${l.native} &nbsp;·&nbsp; ${sizeNote}</div>
+        </div>
+        ${toggle}
+      </div>`;
+  }
+
+  content.innerHTML = `
+    <div style="padding:20px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;height:100%;">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:0.08em;margin-bottom:8px;">LATIN ALFABESİ</div>
+        <div class="lang-list">${latin.map(langCard).join('')}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:0.08em;margin-bottom:8px;">DİĞER ALFABELER</div>
+        <div class="lang-list">${other.map(langCard).join('')}</div>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.2);padding-bottom:10px;">
+        İndirme gerektiren diller ilk kullanımda otomatik indirilir. İnternet bağlantısı gereklidir.
+      </div>
+    </div>`;
+
+  content.querySelectorAll('.lang-toggle').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const code = btn.dataset.code;
+      if (current.includes(code)) {
+        current = current.filter(c => c !== code);
+      } else {
+        current.push(code);
+      }
+      current = await window.api.setOcrLangs(current);
+      renderSettings();
+    });
+  });
+}
 
 // ── Başlangıç ──
 loadPage();

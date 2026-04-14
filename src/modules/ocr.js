@@ -1,16 +1,23 @@
-/**
- * ocr.js — PaddleOCR ile OCR
- *
- * Sharp ile kırpıp işlenmiş görüntüyü, kalıcı bir Python
- * daemon'a (ocr_easyocr.py) JSON Lines protokolüyle gönderir.
- * Daemon model yüklemeyi sadece bir kez yapar → hızlı yanıt.
- */
+// EasyOCR daemon yönetimi — JSON Lines protokolü (stdin/stdout)
 const { spawn } = require('child_process');
 const path = require('path');
 
 let pyProc = null;
 let pendingResolvers = [];
 let lineBuffer = '';
+let currentLangs = ['en'];
+
+function setLangs(langs) {
+  currentLangs = langs.length ? langs : ['en'];
+  if (pyProc && !pyProc.killed) {
+    pyProc.kill();
+    pyProc = null;
+  }
+}
+
+function getLangs() {
+  return currentLangs;
+}
 
 function getPyProc() {
   if (pyProc && !pyProc.killed) return pyProc;
@@ -19,7 +26,7 @@ function getPyProc() {
 
   // Windows'ta "python", diğerlerinde "python3" dene
   const cmd = process.platform === 'win32' ? 'python' : 'python3';
-  pyProc = spawn(cmd, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+  pyProc = spawn(cmd, [scriptPath, '--langs', currentLangs.join(',')], { stdio: ['pipe', 'pipe', 'pipe'] });
 
   pyProc.stderr.on('data', (d) => {
     console.log('[EasyOCR stderr]', d.toString().trim());
@@ -110,4 +117,4 @@ async function recognize(imageBase64, region) {
   return { text, translated };
 }
 
-module.exports = { recognize };
+module.exports = { recognize, setLangs, getLangs };

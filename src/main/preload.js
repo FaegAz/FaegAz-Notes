@@ -49,4 +49,8 @@ contextBridge.exposeInMainWorld('api', {
 
   // Veri değişikliği bildirimi (kelime/not eklendi)
   onDataChanged: (callback) => ipcRenderer.on('data-changed', (_e, mode) => callback(mode)),
+
+  // OCR dil ayarları
+  getOcrLangs: () => ipcRenderer.invoke('get-ocr-langs'),
+  setOcrLangs: (langs) => ipcRenderer.invoke('set-ocr-langs', langs),
 });
