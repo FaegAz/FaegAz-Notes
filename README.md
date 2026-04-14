@@ -21,9 +21,6 @@ A modern, minimalist Windows desktop app for notes, tasks, habits, vocabulary an
 <!-- Ana pencere -->
 ![Main Window](assets/screenshots/main.png)
 
-<!-- Floating panel -->
-![Floating Panel](assets/screenshots/floating.png)
-
 <!-- OCR seçimi -->
 ![OCR](assets/screenshots/ocr.png)
 
@@ -85,16 +82,7 @@ MIT — Türker Yağız Odabaş
 
 Windows için modern, minimalist bir masaüstü not uygulaması. Not alma, görev takibi, alışkanlıklar, kelime kartları ve OCR özellikleriyle gelir.
 
-### Ekran Görüntüleri
 
-<!-- Ana pencere -->
-![Ana Pencere](assets/screenshots/main.png)
-
-<!-- Floating panel -->
-![Floating Panel](assets/screenshots/floating.png)
-
-<!-- OCR seçimi -->
-![OCR](assets/screenshots/ocr.png)
 
 ### Özellikler
 
