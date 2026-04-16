@@ -44,6 +44,10 @@ A modern, minimalist Windows desktop app for notes, tasks, habits, vocabulary an
 
 > If Windows shows an "Unknown Publisher" warning, click **Run anyway**.
 
+All features (notes, tasks, habits, calendar, vocabulary) work out of the box — **no installation required**.
+
+**OCR feature only:** Requires Python + additional packages (see below). If you don't need OCR, skip that section entirely.
+
 #### From Source
 
 ```bash
@@ -103,6 +107,10 @@ Windows için modern, minimalist bir masaüstü not uygulaması. Not alma, göre
 2. `FaegAz Notes 1.0.0.exe` dosyasını çalıştır
 
 > Windows "Bilinmeyen Yayıncı" uyarısı verirse **"Yine de çalıştır"** seçeneğini seç.
+
+Not, görev, alışkanlık, takvim, kelime kartı özellikleri **kurulum gerektirmeden** çalışır.
+
+**Yalnızca OCR özelliği için:** Python ve ek paketler gerekir (aşağıya bak). OCR kullanmayacaksan bu adımı atlayabilirsin.
 
 #### Kaynak Koddan
 
